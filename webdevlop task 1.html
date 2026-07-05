@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltage Studio — Design With High Voltage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+  /* ===== TOKENS ===== */
+  :root{
+    --black:#0a0a0a;
+    --charcoal:#161519;
+    --charcoal-2:#1e1c22;
+    --yellow:#ffd400;
+    --yellow-dim:#e0ba00;
+    --white:#f5f4ef;
+    --gray:#948f80;
+    --orange:#ff5722;
+    --stripe-size:64px;
+    --radius:2px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'Space Grotesk',sans-serif;
+    overflow-x:hidden;
+  }
+
+  h1,h2,h3,.display{
+    font-family:'Anton',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+    line-height:0.95;
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.75rem;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    color:var(--yellow);
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  img,svg{display:block;max-width:100%;}
+
+  .wrap{
+    max-width:1200px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  ::selection{background:var(--yellow);color:var(--black);}
+
+  /* focus visibility */
+  a:focus-visible,button:focus-visible,input:focus-visible{
+    outline:3px solid var(--yellow);
+    outline-offset:3px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important;}
+  }
+
+  /* ===== HAZARD STRIPE SIGNATURE ELEMENT ===== */
+  .hazard{
+    height:14px;
+    width:100%;
+    background:repeating-linear-gradient(
+      -45deg,
+      var(--yellow) 0 18px,
+      var(--black) 18px 36px
+    );
+  }
+  .hazard-band{
+    height:56px;
+    width:200%;
+    background:repeating-linear-gradient(
+      -45deg,
+      var(--yellow) 0 28px,
+      var(--black) 28px 56px
+    );
+    animation:hazard-scroll 6s linear infinite;
+  }
+  .hazard-divider{
+    overflow:hidden;
+    width:100%;
+    border-top:1px solid var(--black);
+    border-bottom:1px solid var(--black);
+  }
+  @keyframes hazard-scroll{
+    from{transform:translateX(0);}
+    to{transform:translateX(-56px);}
+  }
+
+  /* ===== NAV ===== */
+  .site-nav{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:1000;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:22px 32px;
+    background:transparent;
+    border-bottom:1px solid transparent;
+    transition:background .35s ease, border-color .35s ease, padding .35s ease;
+  }
+  .site-nav.is-scrolled{
+    background:rgba(10,10,10,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--yellow);
+    padding:14px 32px;
+  }
+  .nav-logo{
+    font-family:'Anton',sans-serif;
+    font-size:1.35rem;
+    letter-spacing:0.02em;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .nav-logo .bolt{color:var(--yellow);}
+
+  .nav-links{
+    display:flex;
+    gap:34px;
+    list-style:none;
+  }
+  .nav-links a{
+    position:relative;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.8rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:6px 2px;
+    color:var(--white);
+    transition:color .2s ease;
+  }
+  .nav-links a::after{
+    content:"";
+    position:absolute;
+    left:0;bottom:0;
+    width:0%;
+    height:2px;
+    background:var(--yellow);
+    transition:width .25s ease;
+  }
+  .nav-links a:hover{color:var(--yellow);}
+  .nav-links a:hover::after{width:100%;}
+
+  .nav-cta{
+    display:flex;
+    align-items:center;
+    gap:18px;
+  }
+  .btn{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:12px 22px;
+    border-radius:var(--radius);
+    border:2px solid var(--yellow);
+    cursor:pointer;
+    transition:transform .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+    background:transparent;
+    color:var(--yellow);
+  }
+  .btn:hover{
+    background:var(--yellow);
+    color:var(--black);
+    transform:translateY(-2px);
+    box-shadow:0 6px 0 var(--orange);
+  }
+  .btn-solid{
+    background:var(--yellow);
+    color:var(--black);
+  }
+  .btn-solid:hover{
+    background:var(--white);
+    border-color:var(--white);
+    box-shadow:0 6px 0 var(--yellow);
+  }
+
+  .hamburger{
+    display:none;
+    flex-direction:column;
+    gap:5px;
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:6px;
+  }
+  .hamburger span{
+    width:26px;height:3px;background:var(--yellow);display:block;transition:transform .25s ease, opacity .25s ease;
+  }
+  .hamburger.is-open span:nth-child(1){transform:translateY(8px) rotate(45deg);}
+  .hamburger.is-open span:nth-child(2){opacity:0;}
+  .hamburger.is-open span:nth-child(3){transform:translateY(-8px) rotate(-45deg);}
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:190px 32px 120px;
+    position:relative;
+    background:
+      radial-gradient(circle at 82% 12%, rgba(255,212,0,0.10), transparent 42%),
+      var(--black);
+  }
+  .hero-inner{
+    max-width:1200px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:1.3fr 0.7fr;
+    gap:48px;
+    align-items:end;
+  }
+  .hero h1{
+    font-size:clamp(3rem,7vw,6.2rem);
+    color:var(--white);
+  }
+  .hero h1 span{color:var(--yellow);}
+  .hero p{
+    margin-top:26px;
+    max-width:480px;
+    color:var(--gray);
+    font-size:1.05rem;
+    line-height:1.6;
+  }
+  .hero-ctas{
+    display:flex;
+    gap:16px;
+    margin-top:38px;
+    flex-wrap:wrap;
+  }
+  .hero-meta{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.82rem;
+    color:var(--gray);
+    border-left:2px solid var(--yellow);
+    padding-left:18px;
+    line-height:1.9;
+  }
+  .hero-meta b{color:var(--white);}
+
+  /* ===== SECTION SHELL ===== */
+  section{padding:100px 0;}
+  .section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:24px;
+    margin-bottom:56px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{font-size:clamp(2.1rem,4vw,3rem);color:var(--white);}
+  .section-head p{color:var(--gray);max-width:380px;}
+
+  /* ===== STATS ===== */
+  .stats-strip{background:var(--charcoal);}
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0;
+  }
+  .stat{
+    padding:52px 24px;
+    text-align:center;
+    border-right:1px solid rgba(255,212,0,0.15);
+  }
+  .stat:last-child{border-right:none;}
+  .stat-num{
+    font-family:'Anton',sans-serif;
+    font-size:3rem;
+    color:var(--yellow);
+  }
+  .stat-label{
+    margin-top:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.75rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--gray);
+  }
+
+  /* ===== SERVICES ===== */
+  .services-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+  }
+  .service-card{
+    background:var(--charcoal);
+    border:1px solid var(--charcoal-2);
+    border-radius:var(--radius);
+    padding:32px 26px;
+    transition:transform .25s ease, border-color .25s ease, background .25s ease;
+  }
+  .service-card:hover{
+    transform:translateY(-6px);
+    border-color:var(--yellow);
+    background:var(--charcoal-2);
+  }
+  .service-num{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--yellow);
+    font-size:0.8rem;
+  }
+  .service-card h3{
+    margin-top:18px;
+    font-size:1.4rem;
+    color:var(--white);
+  }
+  .service-card p{
+    margin-top:12px;
+    color:var(--gray);
+    font-size:0.92rem;
+    line-height:1.55;
+  }
+
+  /* ===== WORK ===== */
+  .work-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:22px;
+  }
+  .work-card{
+    position:relative;
+    aspect-ratio:16/10;
+    border-radius:var(--radius);
+    overflow:hidden;
+    background:linear-gradient(135deg,var(--charcoal-2),var(--charcoal));
+    border:1px solid var(--charcoal-2);
+    display:flex;
+    align-items:flex-end;
+    padding:26px;
+    transition:border-color .25s ease;
+  }
+  .work-card:hover{border-color:var(--yellow);}
+  .work-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:repeating-linear-gradient(-45deg,rgba(255,212,0,0.06) 0 18px, transparent 18px 36px);
+    opacity:0;
+    transition:opacity .25s ease;
+  }
+  .work-card:hover::before{opacity:1;}
+  .work-tag{
+    position:relative;
+    z-index:1;
+  }
+  .work-tag .eyebrow{display:block;margin-bottom:6px;}
+  .work-tag h3{font-size:1.5rem;color:var(--white);}
+
+  /* ===== ABOUT ===== */
+  .about-grid{
+    display:grid;
+    grid-template-columns:0.9fr 1.1fr;
+    gap:56px;
+    align-items:center;
+  }
+  .about-grid p{
+    color:var(--gray);
+    line-height:1.75;
+    font-size:1.02rem;
+  }
+  .about-grid p + p{margin-top:18px;}
+  .about-card{
+    background:var(--yellow);
+    color:var(--black);
+    border-radius:var(--radius);
+    padding:38px;
+  }
+  .about-card .eyebrow{color:var(--black);opacity:0.65;}
+  .about-card h3{margin-top:10px;font-size:1.6rem;}
+  .about-card p{color:rgba(10,10,10,0.75);margin-top:14px;font-size:0.95rem;}
+
+  /* ===== TESTIMONIALS ===== */
+  .testi-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:22px;
+  }
+  .testi-card{
+    background:var(--charcoal);
+    border-left:3px solid var(--yellow);
+    padding:30px 28px;
+    border-radius:var(--radius);
+  }
+  .testi-card p{
+    font-size:1.02rem;
+    line-height:1.6;
+    color:var(--white);
+  }
+  .testi-who{
+    margin-top:18px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color:var(--yellow);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+
+  /* ===== FAQ ===== */
+  .faq-list{max-width:780px;}
+  .faq-item{
+    border-bottom:1px solid var(--charcoal-2);
+  }
+  .faq-q{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:none;
+    border:none;
+    color:var(--white);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.08rem;
+    font-weight:600;
+    padding:22px 0;
+    cursor:pointer;
+    text-align:left;
+  }
+  .faq-q .plus{
+    color:var(--yellow);
+    font-family:'JetBrains Mono',monospace;
+    font-size:1.3rem;
+    transition:transform .25s ease;
+  }
+  .faq-item.is-open .plus{transform:rotate(45deg);}
+  .faq-a{
+    max-height:0;
+    overflow:hidden;
+    color:var(--gray);
+    line-height:1.6;
+    transition:max-height .3s ease;
+  }
+  .faq-a-inner{padding-bottom:22px;max-width:640px;}
+
+  /* ===== CONTACT / FOOTER ===== */
+  .contact{
+    background:var(--charcoal);
+  }
+  .contact-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+    align-items:center;
+  }
+  .contact h2{font-size:clamp(1.9rem,4vw,2.6rem);}
+  .contact p{color:var(--gray);margin-top:14px;max-width:420px;}
+  .newsletter{
+    display:flex;
+    gap:0;
+    margin-top:28px;
+    border:2px solid var(--yellow);
+    border-radius:var(--radius);
+    overflow:hidden;
+    max-width:460px;
+  }
+  .newsletter input{
+    flex:1;
+    background:transparent;
+    border:none;
+    padding:14px 16px;
+    color:var(--white);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:0.95rem;
+  }
+  .newsletter input:focus{outline:none;}
+  .newsletter button{
+    border:none;
+    background:var(--yellow);
+    color:var(--black);
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:0 22px;
+    cursor:pointer;
+    transition:background .2s ease;
+  }
+  .newsletter button:hover{background:var(--white);}
+
+  footer{
+    background:var(--black);
+    padding:44px 0;
+  }
+  .footer-grid{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .footer-links{
+    display:flex;
+    gap:22px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    color:var(--gray);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .footer-links a:hover{color:var(--yellow);}
+  .footer-copy{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.75rem;
+    color:var(--gray);
+  }
+
+  /* ===== LOGIN MODAL ===== */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,10,10,0.82);
+    backdrop-filter:blur(4px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2000;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .25s ease, visibility .25s ease;
+  }
+  .modal-overlay.is-active{opacity:1;visibility:visible;}
+
+  .modal{
+    width:100%;
+    max-width:420px;
+    background:var(--charcoal);
+    border:1px solid var(--yellow);
+    border-radius:var(--radius);
+    padding:40px 36px;
+    position:relative;
+    transform:translateY(16px) scale(0.98);
+    transition:transform .25s ease;
+  }
+  .modal-overlay.is-active .modal{transform:translateY(0) scale(1);}
+
+  .modal-close{
+    position:absolute;
+    top:16px;right:16px;
+    background:none;
+    border:none;
+    color:var(--gray);
+    font-size:1.4rem;
+    cursor:pointer;
+    line-height:1;
+    padding:6px;
+  }
+  .modal-close:hover{color:var(--yellow);}
+
+  .modal-tabs{
+    display:flex;
+    gap:4px;
+    background:var(--black);
+    border-radius:var(--radius);
+    padding:4px;
+    margin-bottom:28px;
+  }
+  .modal-tab{
+    flex:1;
+    text-align:center;
+    padding:10px 0;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--gray);
+    background:none;
+    border:none;
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:background .2s ease, color .2s ease;
+  }
+  .modal-tab.is-active{
+    background:var(--yellow);
+    color:var(--black);
+  }
+
+  .modal h2{
+    font-size:1.6rem;
+    color:var(--white);
+    margin-bottom:6px;
+  }
+  .modal-sub{
+    color:var(--gray);
+    font-size:0.88rem;
+    margin-bottom:24px;
+  }
+
+  .field{margin-bottom:18px;}
+  .field label{
+    display:block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.72rem;
+    letter-spacing:0.07em;
+    text-transform:uppercase;
+    color:var(--gray);
+    margin-bottom:8px;
+  }
+  .field-input-wrap{position:relative;}
+  .field input{
+    width:100%;
+    background:var(--black);
+    border:1px solid var(--charcoal-2);
+    border-radius:var(--radius);
+    padding:13px 44px 13px 14px;
+    color:var(--white);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:0.95rem;
+    transition:border-color .2s ease;
+  }
+  .field input:focus{border-color:var(--yellow);outline:none;}
+  .toggle-pw{
+    position:absolute;
+    right:10px;top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:var(--gray);
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    cursor:pointer;
+    padding:6px;
+  }
+  .toggle-pw:hover{color:var(--yellow);}
+
+  .strength-meter{
+    display:flex;
+    gap:5px;
+    margin-top:10px;
+  }
+  .strength-bar{
+    height:4px;
+    flex:1;
+    background:var(--charcoal-2);
+    border-radius:2px;
+    transition:background .2s ease;
+  }
+  .strength-label{
+    margin-top:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.7rem;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--gray);
+  }
+
+  .modal-forgot{
+    display:block;
+    text-align:right;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.75rem;
+    color:var(--gray);
+    margin:-6px 0 20px;
+  }
+  .modal-forgot:hover{color:var(--yellow);}
+
+  .modal .btn-solid{width:100%;text-align:center;padding:14px 0;}
+
+  .modal-note{
+    margin-top:18px;
+    text-align:center;
+    font-size:0.8rem;
+    color:var(--gray);
+  }
+
+  .form-msg{
+    display:none;
+    margin-top:16px;
+    padding:12px 14px;
+    border-radius:var(--radius);
+    font-size:0.82rem;
+    background:rgba(255,212,0,0.12);
+    border:1px solid var(--yellow);
+    color:var(--yellow);
+  }
+  .form-msg.is-visible{display:block;}
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width:980px){
+    .hero-inner{grid-template-columns:1fr;}
+    .hero-meta{border-left:none;border-top:2px solid var(--yellow);padding:16px 0 0;}
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .stat{border-right:1px solid rgba(255,212,0,0.15);border-bottom:1px solid rgba(255,212,0,0.15);}
+    .services-grid{grid-template-columns:repeat(2,1fr);}
+    .work-grid{grid-template-columns:1fr;}
+    .about-grid{grid-template-columns:1fr;}
+    .testi-grid{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:1fr;}
+  }
+
+  @media (max-width:760px){
+    .nav-links,.nav-cta .btn:not(.login-btn){display:none;}
+    .hamburger{display:flex;}
+    .site-nav.menu-open .nav-links{
+      display:flex;
+      flex-direction:column;
+      position:absolute;
+      top:100%;left:0;right:0;
+      background:var(--black);
+      border-bottom:1px solid var(--yellow);
+      padding:20px 32px 28px;
+      gap:18px;
+    }
+    .hero{padding:150px 20px 80px;}
+    .wrap{padding:0 20px;}
+    .services-grid{grid-template-columns:1fr;}
+    .stats-grid{grid-template-columns:1fr;}
+    .stat{border-right:none;}
+    .section-head{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav class="site-nav" id="siteNav">
+  <a href="#top" class="nav-logo"><span class="bolt">⚡</span>VOLTAGE</a>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+
+  <div class="nav-cta">
+    <button class="btn login-btn" id="openLogin">Client Login</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div id="top"></div>
+
+<!-- ===== HERO ===== -->
+<header class="hero">
+  <div class="hero-inner">
+    <div>
+      <p class="eyebrow">Brand · Motion · Web</p>
+      <h1>Design that hits<br>like <span>high voltage</span></h1>
+      <p>We build bold brand identities, motion, and websites for companies who refuse to blend in. Small team, strong opinions, sharp execution.</p>
+      <div class="hero-ctas">
+        <button class="btn btn-solid" onclick="document.getElementById('work').scrollIntoView()">See Our Work</button>
+        <button class="btn" onclick="document.getElementById('contact').scrollIntoView()">Start a Project</button>
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div><b>Est.</b> 2018, one overworked laptop</div>
+      <div><b>Team</b> 14 designers &amp; engineers</div>
+      <div><b>Based</b> Remote-first studio</div>
+      <div><b>Status</b> Booking Q4 2026</div>
+    </div>
+  </div>
+</header>
+
+<div class="hazard-divider"><div class="hazard-band"></div></div>
+
+<!-- ===== STATS ===== -->
+<section class="stats-strip">
+  <div class="wrap stats-grid">
+    <div class="stat"><div class="stat-num" data-count="120">0</div><div class="stat-label">Projects Shipped</div></div>
+    <div class="stat"><div class="stat-num" data-count="8">0</div><div class="stat-label">Years Live</div></div>
+    <div class="stat"><div class="stat-num" data-count="34">0</div><div class="stat-label">Awards Won</div></div>
+    <div class="stat"><div class="stat-num" data-count="99">0</div><div class="stat-label">% Clients Return</div></div>
+  </div>
+</section>
+
+<!-- ===== SERVICES ===== -->
+<section id="services">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>What We Wire Up</h2>
+      <p>Four disciplines, one studio. We plug in wherever the brief needs current.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-num">01</div>
+        <h3>Brand Identity</h3>
+        <p>Logos, systems, and guidelines built to survive contact with the real world.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">02</div>
+        <h3>Motion &amp; Animation</h3>
+        <p>Type, illustration, and UI brought to life frame by frame.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">03</div>
+        <h3>Web Development</h3>
+        <p>Fast, accessible sites that convert curiosity into customers.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">04</div>
+        <h3>Digital Campaigns</h3>
+        <p>Launch strategy and content that gets noticed before it gets scrolled past.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="hazard-divider"><div class="hazard-band"></div></div>
+
+<!-- ===== WORK ===== -->
+<section id="work">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Recent Current</h2>
+      <p>A short circuit through some of the brands we've charged up lately.</p>
+    </div>
+    <div class="work-grid">
+      <div class="work-card">
+        <div class="work-tag">
+          <span class="eyebrow">Brand Identity</span>
+          <h3>Nightshift Records</h3>
+        </div>
+      </div>
+      <div class="work-card">
+        <div class="work-tag">
+          <span class="eyebrow">Web + Motion</span>
+          <h3>Kilowatt Coffee</h3>
+        </div>
+      </div>
+      <div class="work-card">
+        <div class="work-tag">
+          <span class="eyebrow">Digital Campaign</span>
+          <h3>Circuit Wear</h3>
+        </div>
+      </div>
+      <div class="work-card">
+        <div class="work-tag">
+          <span class="eyebrow">Full Rebrand</span>
+          <h3>Arclight Fitness</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about">
+  <div class="wrap about-grid">
+    <div>
+      <p class="eyebrow">Who We Are</p>
+      <h2 style="margin-top:10px;font-size:2.2rem;color:var(--white);">Small studio. Strong current.</h2>
+      <p style="margin-top:20px;">Founded in a garage with one overworked laptop and too much coffee, Voltage Studio has spent eight years turning risky ideas into brands people remember.</p>
+      <p>We keep teams small, opinions strong, and execution sharp — every project gets the same attention we'd give our own brand.</p>
+    </div>
+    <div class="about-card">
+      <p class="eyebrow">Our Approach</p>
+      <h3>Contrast is a strategy, not a style.</h3>
+      <p>Bold color, sharp type, and clear hierarchy aren't decoration — they're how a brand gets noticed, remembered, and trusted in under three seconds.</p>
+    </div>
+  </div>
+</section>
+
+<div class="hazard-divider"><div class="hazard-band"></div></div>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Word on the Street</h2>
+      <p>What clients say after the dust settles.</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <p>Voltage rebuilt our entire identity in six weeks and it still feels ahead of the market two years later.</p>
+        <div class="testi-who">— Founder, Kilowatt Coffee</div>
+      </div>
+      <div class="testi-card">
+        <p>The only studio that pushed back on our own bad ideas — and was right every time.</p>
+        <div class="testi-who">— Marketing Lead, Arclight Fitness</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Frequently Asked</h2>
+      <p>Everything you'd want to know before reaching out.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">How long does a typical project take?<span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Most brand identity projects run 4–6 weeks. Full website builds run 6–10 weeks depending on scope. We'll give you an exact timeline before kickoff.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Do you work with early-stage startups?<span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Yes. About a third of our roster is pre-seed to Series A. We offer a lighter "Spark" package sized for early budgets.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">What's included in the Client Portal?<span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Live project boards, file downloads, invoices, and direct messaging with your project lead — all behind your login.</div></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How do we get started?<span class="plus">+</span></button>
+        <div class="faq-a"><div class="faq-a-inner">Send a note through the contact form below. We reply within two business days with next steps and a quote.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="contact" id="contact">
+  <div class="wrap contact-grid">
+    <div>
+      <p class="eyebrow">Get In Touch</p>
+      <h2 style="margin-top:10px;color:var(--white);">Ready to plug in?</h2>
+      <p>Drop your email and we'll send our current availability, rate sheet, and a few case studies.</p>
+      <form class="newsletter" onsubmit="event.preventDefault(); this.reset(); alert('Thanks — check your inbox shortly.');">
+        <input type="email" placeholder="you@company.com" required aria-label="Email address">
+        <button type="submit">Notify Me</button>
+      </form>
+    </div>
+    <div>
+      <p class="eyebrow">Direct</p>
+      <h2 style="margin-top:10px;color:var(--white);font-size:1.8rem;">hello@voltage.studio</h2>
+      <p>Prefer to talk it through first? We're available Mon–Fri, 9am–6pm, response within one business day.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="wrap footer-grid">
+    <div class="nav-logo"><span class="bolt">⚡</span>VOLTAGE</div>
+    <div class="footer-links">
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 Voltage Studio. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- ===== LOGIN / SIGNUP MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+
+    <div class="modal-tabs">
+      <button class="modal-tab is-active" data-tab="login">Log In</button>
+      <button class="modal-tab" data-tab="signup">Sign Up</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm">
+      <h2>Client Portal</h2>
+      <p class="modal-sub">Access your project boards, files, and invoices.</p>
+
+      <div class="field">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="you@company.com" required>
+      </div>
+
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <div class="field-input-wrap">
+          <input type="password" id="loginPassword" placeholder="••••••••" required minlength="6">
+          <button type="button" class="toggle-pw" data-target="loginPassword">Show</button>
+        </div>
+      </div>
+
+      <a href="#" class="modal-forgot">Forgot password?</a>
+
+      <button type="submit" class="btn btn-solid">Access Portal</button>
+      <div class="form-msg" id="loginMsg">Logged in — welcome back! (demo only, no data is stored)</div>
+      <p class="modal-note">New client? Switch to Sign Up above.</p>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form id="signupForm" style="display:none;">
+      <h2>Create Account</h2>
+      <p class="modal-sub">Set up portal access for your project.</p>
+
+      <div class="field">
+        <label for="signupName">Full Name</label>
+        <input type="text" id="signupName" placeholder="Jordan Reyes" required>
+      </div>
+
+      <div class="field">
+        <label for="signupEmail">Email</label>
+        <input type="email" id="signupEmail" placeholder="you@company.com" required>
+      </div>
+
+      <div class="field">
+        <label for="signupPassword">Password</label>
+        <div class="field-input-wrap">
+          <input type="password" id="signupPassword" placeholder="Min. 8 characters" required minlength="8">
+          <button type="button" class="toggle-pw" data-target="signupPassword">Show</button>
+        </div>
+        <div class="strength-meter">
+          <div class="strength-bar" data-bar="1"></div>
+          <div class="strength-bar" data-bar="2"></div>
+          <div class="strength-bar" data-bar="3"></div>
+          <div class="strength-bar" data-bar="4"></div>
+        </div>
+        <div class="strength-label" id="strengthLabel">Password strength</div>
+      </div>
+
+      <div class="field">
+        <label for="signupConfirm">Confirm Password</label>
+        <div class="field-input-wrap">
+          <input type="password" id="signupConfirm" placeholder="Repeat password" required minlength="8">
+          <button type="button" class="toggle-pw" data-target="signupConfirm">Show</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-solid">Create Account</button>
+      <div class="form-msg" id="signupMsg">Account created — you're wired in! (demo only, no data is stored)</div>
+      <p class="modal-note">Already have access? Switch to Log In above.</p>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  // ===== NAV: scroll state =====
+  const nav = document.getElementById('siteNav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('is-scrolled', window.scrollY > 40);
+  });
+
+  // ===== MOBILE MENU =====
+  const hamburger = document.getElementById('hamburger');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('is-open');
+    nav.classList.toggle('menu-open');
+  });
+  document.getElementById('navLinks').addEventListener('click', (e) => {
+    if (e.target.tagName === 'A') {
+      hamburger.classList.remove('is-open');
+      nav.classList.remove('menu-open');
+    }
+  });
+
+  // ===== STATS COUNTER ON SCROLL =====
+  const stats = document.querySelectorAll('.stat-num');
+  let statsAnimated = false;
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !statsAnimated) {
+        statsAnimated = true;
+        stats.forEach(stat => {
+          const target = parseInt(stat.dataset.count, 10);
+          let current = 0;
+          const step = Math.max(1, Math.ceil(target / 60));
+          const tick = () => {
+            current += step;
+            if (current >= target) { stat.textContent = target; }
+            else { stat.textContent = current; requestAnimationFrame(tick); }
+          };
+          tick();
+        });
+      }
+    });
+  }, { threshold: 0.4 });
+  const statsStrip = document.querySelector('.stats-strip');
+  if (statsStrip) statsObserver.observe(statsStrip);
+
+  // ===== FAQ ACCORDION =====
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', () => {
+      const isOpen = item.classList.contains('is-open');
+      document.querySelectorAll('.faq-item').forEach(other => {
+        other.classList.remove('is-open');
+        other.querySelector('.faq-a').style.maxHeight = null;
+      });
+      if (!isOpen) {
+        item.classList.add('is-open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // ===== LOGIN MODAL =====
+  const overlay = document.getElementById('modalOverlay');
+  const openBtn = document.getElementById('openLogin');
+  const closeBtn = document.getElementById('modalClose');
+  const tabs = document.querySelectorAll('.modal-tab');
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
+
+  function openModal() { overlay.classList.add('is-active'); }
+  function closeModal() { overlay.classList.remove('is-active'); }
+
+  openBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      if (tab.dataset.tab === 'login') {
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+      }
+    });
+  });
+
+  // link inline "switch" notes to tabs too
+  document.querySelectorAll('.modal-note').forEach(note => {
+    note.style.cursor = 'default';
+  });
+
+  // ===== SHOW / HIDE PASSWORD =====
+  document.querySelectorAll('.toggle-pw').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const isPw = input.type === 'password';
+      input.type = isPw ? 'text' : 'password';
+      btn.textContent = isPw ? 'Hide' : 'Show';
+    });
+  });
+
+  // ===== PASSWORD STRENGTH METER =====
+  const signupPassword = document.getElementById('signupPassword');
+  const bars = document.querySelectorAll('.strength-bar');
+  const strengthLabel = document.getElementById('strengthLabel');
+  const strengthColors = ['#ff5722', '#ff5722', '#ffd400', '#4caf50'];
+  const strengthText = ['Weak', 'Weak', 'Okay', 'Strong'];
+
+  signupPassword.addEventListener('input', () => {
+    const val = signupPassword.value;
+    let score = 0;
+    if (val.length >= 8) score++;
+    if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+    if (/[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+    score = Math.min(score, 4);
+
+    bars.forEach((bar, i) => {
+      bar.style.background = i < score ? strengthColors[Math.max(score - 1, 0)] : 'var(--charcoal-2)';
+    });
+    strengthLabel.textContent = val.length === 0 ? 'Password strength' : strengthText[Math.max(score - 1, 0)];
+  });
+
+  // ===== FORM SUBMIT (demo only) =====
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    document.getElementById('loginMsg').classList.add('is-visible');
+    setTimeout(() => { closeModal(); document.getElementById('loginMsg').classList.remove('is-visible'); loginForm.reset(); }, 1400);
+  });
+
+  signupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const pw = document.getElementById('signupPassword').value;
+    const confirm = document.getElementById('signupConfirm').value;
+    if (pw !== confirm) {
+      alert("Passwords don't match — please re-check.");
+      return;
+    }
+    document.getElementById('signupMsg').classList.add('is-visible');
+    setTimeout(() => { closeModal(); document.getElementById('signupMsg').classList.remove('is-visible'); signupForm.reset(); bars.forEach(b => b.style.background = 'var(--charcoal-2)'); strengthLabel.textContent = 'Password strength'; }, 1400);
+  });
+</script>
+
+</body>
+</html>
